@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/kaleido-io/kaleido-go/cmd"
+import "github.com/shenzhao-kaleido/kaleido-project/cmd"
 
 func main() {
 	cmd.Execute()

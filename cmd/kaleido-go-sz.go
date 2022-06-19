@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kaleido-io/kaleido-go/pkg/kldexerciser"
+	"github.com/shenzhao-kaleido/kaleido-project/pkg/kldexerciser-sz"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ func initLogging(debugLevel int) {
 	log.Debug("Debug level ", debugLevel)
 }
 
-var exerciser kldexerciser.Exerciser
+var exerciser kldexerciser-sz.Exerciser
 
 func init() {
 	cmd.Flags().StringArrayVarP(&exerciser.Accounts, "accounts", "a", []string{}, "Account addresses - 1 per worker needed for geth signing")
@@ -48,7 +48,7 @@ func init() {
 	cmd.Flags().StringVarP(&exerciser.ContractName, "contractname", "n", "", "The name of the contract to call, for Solidity files with multiple contracts")
 	cmd.Flags().IntVarP(&exerciser.DebugLevel, "debug", "d", 1, "0=error, 1=info, 2=debug")
 	cmd.Flags().Int64VarP(&exerciser.Nonce, "nonce", "N", -1, "Nonce (transaction number) for the next transaction")
-	cmd.Flags().BoolVarP(&exerciser.ExternalSign, "extsign", "e", false, "Sign externally with generated private keys + accounts")
+	//cmd.Flags().BoolVarP(&exerciser.ExternalSign, "extsign", "e", false, "Sign externally with generated private keys + accounts")
 	cmd.Flags().StringVarP(&exerciser.ExternalSignJSON, "keys", "k", "", "JSON file to create/update with an array of private keys for extsign")
 	cmd.Flags().BoolVarP(&exerciser.EstimateGas, "estimategas", "E", false, "Estimate the gas for the contract call, rather than sending a txn")
 	cmd.Flags().StringVarP(&exerciser.EVMVersion, "evm-version", "V", "byzantium", "EVM version to compile for (byzantium etc.)")
@@ -72,13 +72,15 @@ func init() {
 	cmd.MarkFlagRequired("url")
 	cmd.MarkFlagRequired("file")
 	cmd.MarkFlagRequired("method")
+	cmd.MarkFlagRequired("keys")
 }
 
 var cmd = &cobra.Command{
-	Use:   "kaleido-go",
-	Short: "Sample exerciser for Ethereum permissioned chains - from Kaleido",
+	Use:   "kaleido-go-sz",
+	Short: "Sample exerciser for Ethereum permissioned chains - from Kaleido - modified for Shen's project",
 	Run: func(cmd *cobra.Command, args []string) {
 		initLogging(exerciser.DebugLevel)
+		exerciser.ExternalSign = true
 		if err := exerciser.Start(); err != nil {
 			log.Error("Exerciser Start: ", err)
 			os.Exit(1)

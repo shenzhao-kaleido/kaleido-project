@@ -1,4 +1,4 @@
-module github.com/kaleido-io/kaleido-go
+module github.com/shenzhao-kaleido/kaleido-project
 
 go 1.15
 
