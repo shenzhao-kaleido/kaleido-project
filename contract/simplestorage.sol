@@ -10,4 +10,8 @@ contract SimpleStorage {
   function get() public view returns (uint) {
     return storedData;
   }
+
+  function test() public view returns (uint){
+        return 2;
+  }
 }
