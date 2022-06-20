@@ -1,40 +1,17 @@
-# kaleido-go
+# Shen's Kaleido Project
 
-Chain exerciser example in Golang for Ethereum permissioned chains.
+This project is based on kaleido-go project (https://github.com/kaleido-io/kaleido-go). 
 
-Built as a sample and exerciser for the [kaleido.io](https://kaleido.io) platform,
-and compatible with other Ethereum chains.
+The signing method is set to external signing with provided key file or generated a new one. 
 
-Tested with [go-ethereum](https://github.com/ethereum/go-ethereum/) and
-[Quorum](https://github.com/jpmorganchase/quorum) and [Hyperledger Besu](https://www.hyperledger.org/projects/besu) permissioned chains.
+An instance of ERC721 contract is provided with mint, burn, and transfer function. 
 
-The exerciser uses the go-ethererum JSON/RPC client to provide a simple command-line
-interface and code samples for:
-- Compiling and executing Solidity smart contracts
-- Submitting transactions to be signed by the go-ethereum (geth) node
-- Externally signing transactions (using [EIP155](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md) signing)
-- Checking for transaction receipts
-- Private Transactions compatible with Quorum, and the [EEA Enterprise Ethereum Client Specification V1](https://entethalliance.org/resources/)
 
-## Installing (Mac/Linux/Windows)
-
-Grab the latest binary release from: https://github.com/kaleido-io/kaleido-go/releases
-Download, unzip and run.
-
-## License
-
-This code is distributed under the [Apache 2 license](LICENSE).
-
-> Please note the code currently statically links to code distributed under the
-> LGPL license.
 
 ## Running
 
-```
-Sample exerciser for Ethereum permissioned chains - from Kaleido
-
 Usage:
-  kaleido-go [flags]
+  kaleido-go-sz [flags]
 
 Flags:
   -a, --accounts stringArray       Account addresses - 1 per worker needed for geth signing
@@ -66,7 +43,19 @@ Flags:
   -t, --transactions int           Count of transactions submit on each worker loop (default 1)
   -u, --url string                 JSON/RPC URL for Ethereum node: https://user:pass@xyz-rpc.kaleido.io
   -w, --workers int                Number of workers to run (default 1)
-```
+
+Required flags:
+  -u url for node
+  -f file for solidity
+  -m method for calling
+  -k key for external signing
+
+Changes:
+  compare to kaleido go:
+  privateFrom -p is removed as it is not compatible with external signed
+  exterSign   -e is removed as it is set to be True 
+  key         -k is set to be required as always signing externally
+
 
 ## Build
 
@@ -80,9 +69,9 @@ Example commands below expect you to have set the following parameters:
 
 ```sh
 # The full Node URL including any application credentials
-NODE_URL="https://user:pass@nodeurl-rpc.kaleido.io"
+NODE_URL="http://localhost:22001"
 # Account existing on the node
-ACCOUNT=0x0102030405060708090a0b0c0e0e0f1011121314
+ACCOUNT=0x69a54fec0630ff6959ab3acf254579c4b7a67b64
 ```
 
 # Deploy a contract and call a simple transaction
