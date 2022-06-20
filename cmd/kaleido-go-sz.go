@@ -44,7 +44,7 @@ func init() {
 	cmd.Flags().StringArrayVarP(&exerciser.Args, "args", "x", []string{}, "String arguments to pass to contract method (auto-converted to type)")
 	cmd.Flags().Int64VarP(&exerciser.ChainID, "chainid", "i", 0, "Chain ID for EIP155 signing (networkid queried if omitted)")
 	cmd.Flags().BoolVarP(&exerciser.Call, "call", "C", false, "Call the contract and return a value, rather than sending a txn")
-	cmd.Flags().StringVarP(&exerciser.Contract, "contract", "c", "", "Pre-deployed contract address. Will be deployed if not specified. contract-address/address.json for last called contract")
+	cmd.Flags().StringVarP(&exerciser.Contract, "contract", "c", "", "Pre-deployed contract address. Will be deployed if not specified. Alternatively use ./contract-address/address.json for last called contract")
 	cmd.Flags().StringVarP(&exerciser.ContractName, "contractname", "n", "", "The name of the contract to call, for Solidity files with multiple contracts")
 	cmd.Flags().IntVarP(&exerciser.DebugLevel, "debug", "d", 1, "0=error, 1=info, 2=debug")
 	cmd.Flags().Int64VarP(&exerciser.Nonce, "nonce", "N", -1, "Nonce (transaction number) for the next transaction")
@@ -73,7 +73,7 @@ func init() {
 	cmd.MarkFlagRequired("file")
 	cmd.MarkFlagRequired("method")
 	// ensure external signing --sz
-	cmd.MarkFlagRequired("keys")
+	// cmd.MarkFlagRequired("keys")
 }
 
 var cmd = &cobra.Command{
@@ -84,6 +84,15 @@ var cmd = &cobra.Command{
 		// ensure external signing --sz
 		exerciser.ExternalSign = true
 		exerciser.PrivateFrom = ""
+		if exerciser.ExternalSignJSON == "" {
+			if len(exerciser.Accounts) == 1 {
+				exerciser.ExternalSignJSON = "./contract-keys/nodekey-" + exerciser.Accounts[0] + ".json"
+			} else {
+				log.Error("Require external key")
+				os.Exit(1)
+			}
+
+		}
 		// doesn't support private from for external sign
 		if err := exerciser.Start(); err != nil {
 			log.Error("Exerciser Start: ", err)

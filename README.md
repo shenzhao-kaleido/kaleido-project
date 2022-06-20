@@ -9,7 +9,7 @@ An instance of ERC721 contract is provided with mint, burn, and transfer functio
 
 
 ## Running
-
+```sh
 Usage:
   kaleido-go-sz [flags]
 
@@ -48,14 +48,13 @@ Required flags:
   -u url for node
   -f file for solidity
   -m method for calling
-  -k key for external signing
 
 Changes:
   compare to kaleido go:
   privateFrom -p is removed as it is not compatible with external signed
   exterSign   -e is removed as it is set to be True 
-  key         -k is set to be required as always signing externally
-
+  key         -k is set to ./contract-keys/nodekey-$NODEACCOUNT.json if not specified and if only one node is input
+```
 
 ## Build
 
@@ -74,14 +73,22 @@ NODE_URL="http://localhost:22001"
 ACCOUNT=0x69a54fec0630ff6959ab3acf254579c4b7a67b64
 ```
 
-# Deploy a contract and call a simple transaction
+# Deploy a ERC721 contract and call a mint
 
 Shell Command (linux/mac):
 
 ```sh
-./kaleido-go -f examples/simplestorage.sol \
-  -m set -x 12345 \
-  -u "$NODE_URL" -a "$ACCOUNT"
+# mint one token for account
+# without -k line, key file is defaulted as ./contract-keys/nodekey-0x69a54fec0630ff6959ab3acf254579c4b7a67b64.json
+# the address of contrast, together with a time stamp, is stored in ./contract-address/address.json
+./kaleido-go \
+  -f ./contract/sz.sol \
+  -m mintMulti \
+  -x $ACCOUNT -x 1 \
+  -u "$NODE_URL" \
+  -a "$ACCOUNT" \
+  -n contract/sz.sol:sz \
+  -k ./contract-keys/example.json \ 
 ```
 
 > You can enable DEBUG output with `-d 2`
@@ -89,13 +96,17 @@ Shell Command (linux/mac):
 Example output:
 
 ```
-INFO[2018-05-14T22:58:41-04:00] Exercising method 'set' in solidity contract examples/simplestorage.sol
-INFO[2018-05-14T22:58:42-04:00] Deploying contract using worker W0000
-INFO[2018-05-14T22:58:42-04:00] W0000/L0000/N000127: TX:0x739746d5b0c8bfb85e9975bd6ba5b5de52debd4e5119b556e22370ebc6947bdf Sent. OK=true [0.06s]
-INFO[2018-05-14T22:58:54-04:00] W0000/L0000/N000128: TX:0x739746d5b0c8bfb85e9975bd6ba5b5de52debd4e5119b556e22370ebc6947bdf Mined=true after 11.18s [0.18s]
-INFO[2018-05-14T22:58:54-04:00] Contract address=0x2C13d6D15975EfbF7DfD2bFdaFe7413e391eFc65
-INFO[2018-05-14T22:58:54-04:00] W0000/L0000/N000128: TX:0x51a62f3922f59405e86f85d79ad79bfcfdf24305ac4b103c6fe0ca6cd97105c3 Sent. OK=true [0.04s]
-INFO[2018-05-14T22:59:05-04:00] W0000/L0000/N000129: TX:0x51a62f3922f59405e86f85d79ad79bfcfdf24305ac4b103c6fe0ca6cd97105c3 Mined=true after 11.17s [0.17s]
+INFO[2022-06-20T12:12:34-04:00] File ./contract-keys/example.json does not exist, it will be created (open ./contract-keys/example.json: no such file or directory)
+INFO[2022-06-20T12:12:34-04:00] Exercising method 'mintMulti' in solidity contract ./contract/sz.sol
+INFO[2022-06-20T12:12:34-04:00] Deploying contract using worker W0000
+INFO[2022-06-20T12:12:34-04:00] W0000/L0000/N000000: TX:0x86e6f39ced21680a80f6014f7916c2c569848bc70611853248b44589b6daf374 Sent. OK=true [0.00s]
+INFO[2022-06-20T12:12:45-04:00] W0000/L0000/N000000: TX:0x86e6f39ced21680a80f6014f7916c2c569848bc70611853248b44589b6daf374 Mined=true after 11.01s [0.00s]
+INFO[2022-06-20T12:12:45-04:00] test receipt: &{0x4d824e471735289e1ce5847367d134e9d02b753b82b80a0a9b3e08d754b6f9a3 0x11 0x2d1B97e4426E6CCe4821C391a70C20085764e0BA 0x1efcd 0x86e6f39ced21680a80f6014f7916c2c569848bc70611853248b44589b6daf374 0x367C771918e303A9593fFc2Eb2710130077CCd08 0x1efcd 0x1 <nil> 0x0}
+INFO[2022-06-20T12:12:45-04:00] Contract address=0x2d1B97e4426E6CCe4821C391a70C20085764e0BA
+INFO[2022-06-20T12:12:45-04:00] W0000/L0000/N000001: TX:0x17dacf3033b299ac90e37532f91283d3a84202768b11d4e242579ca5909cdf02 Sent. OK=true [0.01s]
+INFO[2022-06-20T12:12:56-04:00] W0000/L0000/N000002: TX:0x17dacf3033b299ac90e37532f91283d3a84202768b11d4e242579ca5909cdf02 Mined=true after 11.00s [0.00s]
+INFO[2022-06-20T12:12:56-04:00] All workers complete. Success=1 Failure=0
+
 ```
 
 # Call the deployed contract to get the value
@@ -104,54 +115,27 @@ INFO[2018-05-14T22:59:05-04:00] W0000/L0000/N000129: TX:0x51a62f3922f59405e86f85
 Shell Command (linux/mac):
 
 ```sh
-./kaleido-go -f examples/simplestorage.sol \
-  -m get -C -c 0x2C13d6D15975EfbF7DfD2bFdaFe7413e391eFc65 \
-  -u "$NODE_URL" -a "$ACCOUNT"
+# in -c line, example is for last called contract; also could input contract address directly
+./kaleido-go \
+  -f ./contract/sz.sol \
+  -m ownerOf \
+  -x 1 \
+  -u "$NODE_URL" \
+  -a "$ACCOUNT" \
+  -n contract/sz.sol:sz \
+  -k ./contract-keys/example.json \
+  -c ./contract-address/address.json \
+  -C True
 ```
 
 > TODO: Perform data-type sensitive parsing of return values
 
 Example output:
 ```
-INFO[2018-05-14T23:01:26-04:00] Exercising method 'get' in solidity contract examples/simplestorage.sol
-INFO[2018-05-14T23:01:26-04:00] Contract address=0x2C13d6D15975EfbF7DfD2bFdaFe7413e391eFc65
-INFO[2018-05-14T23:01:26-04:00] W0000/L0000/N000129: Call result: '0x0000000000000000000000000000000000000000000000000000000000003039' [0.04s]
-```
+INFO[2022-06-20T12:25:27-04:00] Externally signing using private keys in ./contract-keys/nodekey-0x69a54fec0630ff6959ab3acf254579c4b7a67b64.json
+INFO[2022-06-20T12:25:27-04:00] Exercising method 'ownerOf' in solidity contract ./contract/sz.sol
+INFO[2022-06-20T12:25:27-04:00] Using last called contract: 0x2d1B97e4426E6CCe4821C391a70C20085764e0BA
+INFO[2022-06-20T12:25:27-04:00] Contract address=0x2d1B97e4426E6CCe4821C391a70C20085764e0BA
+INFO[2022-06-20T12:25:27-04:00] W0000/L0000/N000003: call result: '0x69a54fec0630ff6959ab3acf254579c4b7a67b64' [0.00s]
+INFO[2022-06-20T12:25:38-04:00] All workers complete. Success=0 Failure=0
 
-# Call the deployed contract to get the value in loop
-
-Run 10 contract calls with 1 second delay between each call
-
-Shell command (linux/mac):
-
-```sh
-./kaleido-go -f examples/simplestorage.sol \
-  -m get -C -c 0x2C13d6D15975EfbF7DfD2bFdaFe7413e391eFc65 \
-  -u "$NODE_URL" -a "$ACCOUNT"
-  -l 10 -s 1
-```
-
-
-# Send 10 private transactions with debug and custom wait times
-
-> Private transactions can only currently be signed on the node
-
-Shell Command (linux/mac):
-
-```sh
-./kaleido-go -f examples/simplestorage.sol -m set -x 12345 \
-  -t 10 \
-  -p xoA1FQSUHpslp7lJWgRQXDErm/nsP7/CpBOWf6M3VTI= -P p3+cTaDZ9Lw1EPlJlcM9hhezlXTqAEi6xi+LTDIdW2E= \
-  -s 15 -S 30 -d 3 \
-  -u "$NODE_URL" -a "$ACCOUNT"
-```
-
-# Send an externally signed transaction
-
-> The private keys will be randomly generated (and discarded), so this is only an example of external signing logic for exercising a node
-
-Shell Command (linux/mac):
-
-```sh
-./kaleido-go -f examples/simplestorage.sol -m set -x 12345 -u "$NODE_URL" -e
-```
