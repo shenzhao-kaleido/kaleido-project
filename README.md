@@ -9,6 +9,7 @@ An instance of ERC721 contract is provided with mint, burn, and transfer functio
 
 
 ## Running
+
 ```sh
 Usage:
   kaleido-go-sz [flags]
@@ -127,8 +128,6 @@ Shell Command (linux/mac):
   -c ./contract-address/address.json \
   -C True
 ```
-
-> TODO: Perform data-type sensitive parsing of return values
 
 Example output:
 ```
