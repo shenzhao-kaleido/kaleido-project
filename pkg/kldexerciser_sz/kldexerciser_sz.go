@@ -25,6 +25,9 @@ import (
 	"sync"
 	"time"
 
+	"bufio"
+	"os"
+
 	"github.com/ethereum/go-ethereum/common"
 	ecrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -246,13 +249,43 @@ func (e *Exerciser) Start() (err error) {
 			return err
 		}
 	} else {
+		var contractAddr common.Address
 		if !common.IsHexAddress(e.Contract) {
-			return fmt.Errorf("invalid contract address: %s", e.Contract)
+			addressRead, err := os.OpenFile(e.Contract, os.O_RDONLY, 0666)
+			if err != nil {
+				return fmt.Errorf("invalid contract log address(no such file): %s", e.Contract)
+			} else {
+				var lastLine string
+				scanner := bufio.NewScanner(addressRead)
+				for scanner.Scan() {
+					lastLine = scanner.Text()
+				}
+				if !common.IsHexAddress(lastLine) {
+					return fmt.Errorf("invalid contract log address(get invalid address log: %s): %s", lastLine, e.Contract)
+				} else {
+					contractAddr = common.HexToAddress(lastLine)
+				}
+
+			}
+		} else {
+			contractAddr = common.HexToAddress(e.Contract)
 		}
-		contractAddr := common.HexToAddress(e.Contract)
 		e.To = &contractAddr
 	}
 	log.Info("Contract address=", e.To.Hex())
+
+	// write contract address --sz
+	addressWrite, err := os.OpenFile("contract-address/address.json", os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		log.Info("something goes wrong when open/create file for address info: ", err.Error())
+	} else {
+		addressWrite.Write([]byte(time.Now().Format("2006-01-02 15:04:05")))
+		addressWrite.WriteString("\n")
+		addressWrite.Write([]byte(e.To.Hex()))
+		addressWrite.WriteString("\n")
+	}
+	addressWrite.Close()
+	//
 
 	if e.EstimateGas {
 		log.Debug("Calling contract")

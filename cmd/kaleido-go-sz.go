@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shenzhao-kaleido/kaleido-project/pkg/kldexerciser-sz"
+	"github.com/shenzhao-kaleido/kaleido-project/pkg/kldexerciser_sz"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -37,14 +37,14 @@ func initLogging(debugLevel int) {
 	log.Debug("Debug level ", debugLevel)
 }
 
-var exerciser kldexerciser-sz.Exerciser
+var exerciser kldexerciser_sz.Exerciser
 
 func init() {
 	cmd.Flags().StringArrayVarP(&exerciser.Accounts, "accounts", "a", []string{}, "Account addresses - 1 per worker needed for geth signing")
 	cmd.Flags().StringArrayVarP(&exerciser.Args, "args", "x", []string{}, "String arguments to pass to contract method (auto-converted to type)")
 	cmd.Flags().Int64VarP(&exerciser.ChainID, "chainid", "i", 0, "Chain ID for EIP155 signing (networkid queried if omitted)")
 	cmd.Flags().BoolVarP(&exerciser.Call, "call", "C", false, "Call the contract and return a value, rather than sending a txn")
-	cmd.Flags().StringVarP(&exerciser.Contract, "contract", "c", "", "Pre-deployed contract address. Will be deployed if not specified")
+	cmd.Flags().StringVarP(&exerciser.Contract, "contract", "c", "", "Pre-deployed contract address. Will be deployed if not specified. contract-address/address.json for last called contract")
 	cmd.Flags().StringVarP(&exerciser.ContractName, "contractname", "n", "", "The name of the contract to call, for Solidity files with multiple contracts")
 	cmd.Flags().IntVarP(&exerciser.DebugLevel, "debug", "d", 1, "0=error, 1=info, 2=debug")
 	cmd.Flags().Int64VarP(&exerciser.Nonce, "nonce", "N", -1, "Nonce (transaction number) for the next transaction")
@@ -59,7 +59,7 @@ func init() {
 	cmd.Flags().IntVarP(&exerciser.Loops, "loops", "l", 1, "Loops to perform in each worker before exiting (0=infinite)")
 	cmd.Flags().StringVarP(&exerciser.Method, "method", "m", "", "Method name in the contract to invoke")
 	cmd.Flags().StringArrayVarP(&exerciser.PrivateFor, "privateFor", "P", []string{}, "Private for (see EEA Client Spec V1)")
-	cmd.Flags().StringVarP(&exerciser.PrivateFrom, "privateFrom", "p", "", "Private from (see EEA Client Spec V1)")
+	//cmd.Flags().StringVarP(&exerciser.PrivateFrom, "privateFrom", "p", "", "Private from (see EEA Client Spec V1)")
 	cmd.Flags().IntVarP(&exerciser.RPCTimeout, "rpc-timeout", "R", 30, "Timeout in seconds for an individual RCP call")
 	cmd.Flags().IntVarP(&exerciser.ReceiptWaitMin, "seconds-min", "s", 11, "Time in seconds to wait before checking for a txn receipt/before making subsequent contract call")
 	cmd.Flags().IntVarP(&exerciser.ReceiptWaitMax, "seconds-max", "S", 20, "Time in seconds before timing out waiting for a txn receipt")
@@ -72,6 +72,7 @@ func init() {
 	cmd.MarkFlagRequired("url")
 	cmd.MarkFlagRequired("file")
 	cmd.MarkFlagRequired("method")
+	// ensure external signing --sz
 	cmd.MarkFlagRequired("keys")
 }
 
@@ -80,7 +81,10 @@ var cmd = &cobra.Command{
 	Short: "Sample exerciser for Ethereum permissioned chains - from Kaleido - modified for Shen's project",
 	Run: func(cmd *cobra.Command, args []string) {
 		initLogging(exerciser.DebugLevel)
+		// ensure external signing --sz
 		exerciser.ExternalSign = true
+		exerciser.PrivateFrom = ""
+		// doesn't support private from for external sign
 		if err := exerciser.Start(); err != nil {
 			log.Error("Exerciser Start: ", err)
 			os.Exit(1)
