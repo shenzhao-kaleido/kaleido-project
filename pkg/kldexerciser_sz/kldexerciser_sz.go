@@ -234,11 +234,14 @@ func (e *Exerciser) Start() (err error) {
 
 	if e.Contract == "" {
 		var deployed = false
+		var receiptRx *txnReceipt
 		for i := 0; i < e.Workers && !deployed; i++ {
 			contractWorker := &workers[i]
 
 			log.Infof("Deploying contract using worker %s", contractWorker.Name)
-			e.To, err = contractWorker.InstallContract()
+			receiptRx, e.To, err = contractWorker.InstallContract()
+			log.Info("test receipt: ", receiptRx)
+			// log.Info("1")
 			if err == nil {
 				deployed = true
 			} else {
@@ -264,6 +267,7 @@ func (e *Exerciser) Start() (err error) {
 					return fmt.Errorf("invalid contract log address(get invalid address log: %s): %s", lastLine, e.Contract)
 				} else {
 					contractAddr = common.HexToAddress(lastLine)
+					log.Info("Using last called contract: ", lastLine)
 				}
 
 			}

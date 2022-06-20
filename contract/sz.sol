@@ -138,6 +138,10 @@ contract sz is ERC721 {
         return mintedId;
     }
 
+    function test() public view returns (uint){
+        return 2;
+    }
+
     // auxiliary, should be private
     function searchFor(uint256[] memory array, uint item) public pure returns(int256){
         for(uint256 i=0; i<array.length; i++){

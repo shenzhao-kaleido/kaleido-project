@@ -403,7 +403,7 @@ func (w *Worker) Init(rpc *rpc.Client) (err error) {
 }
 
 // InstallContract installs the contract and returns the address
-func (w *Worker) InstallContract() (*common.Address, error) {
+func (w *Worker) InstallContract() (*txnReceipt, *common.Address, error) {
 	tx := types.NewContractCreation(
 		w.Nonce,
 		big.NewInt(w.Exerciser.Amount),
@@ -413,9 +413,9 @@ func (w *Worker) InstallContract() (*common.Address, error) {
 	)
 	receipt, err := w.sendAndWaitForMining(tx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to install contract: %s", err)
+		return nil, nil, fmt.Errorf("failed to install contract: %s", err)
 	}
-	return receipt.ContractAddress, nil
+	return receipt, receipt.ContractAddress, nil
 }
 
 // CallOnce executes a contract once and returns
