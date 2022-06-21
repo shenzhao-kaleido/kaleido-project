@@ -1,0 +1,9 @@
+[submodule "quorum-tools"]
+	path = quorum-tools
+	url = https://github.com/kaleido-io/quorum-tools.git
+[submodule "quorum"]
+	path = quorum
+	url = https://github.com/kaleido-io/quorum.git
+[submodule "istanbul-tools"]
+	path = istanbul-tools
+	url = https://github.com/getamis/istanbul-tools.git
